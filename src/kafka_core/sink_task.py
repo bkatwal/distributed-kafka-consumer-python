@@ -1,0 +1,70 @@
+from abc import ABC
+from typing import List
+
+from kafka.consumer.fetcher import ConsumerRecord
+from ratelimit import limits, sleep_and_retry
+
+from src.api.stream_writer import StreamWriter
+from src.es_core.console_stream_writer import ConsoleStreamWriter
+from src.exceptions.usi_exceptions import BadConsumerConfigException
+from src.kafka_core.kafka_stream_writer import KafkaStreamWriter
+from src.model.worker_dto import DeadLetterDTO, SinkRecordDTO
+from src.transformers.transformer_util import get_transformer
+
+ONE_SECOND = 1
+CALLS = 20
+
+
+class SinkTask(ABC):
+
+    def __init__(self, config: dict):
+        self.sink_configs = config.get('sink_configs')
+        if self.sink_configs is None:
+            raise BadConsumerConfigException('Missing Sink Config.')
+        self.config = config
+        processor_cls_path = self.sink_configs.get('transformer_cls')
+        if not processor_cls_path:
+            raise BadConsumerConfigException('sink_configs.transformer_cls is a mandatory config')
+        self.stream_transformer = get_transformer(processor_cls_path)
+        self.operation_extractor = None
+        self.sink_stream_writers: List[StreamWriter] = [ConsoleStreamWriter()]
+        if config.get('dlq_config') is not None:
+            self.dlq_stream_writer: KafkaStreamWriter[DeadLetterDTO] = KafkaStreamWriter(
+                config.get('dlq_config'))
+
+    @sleep_and_retry
+    @limits(calls=CALLS, period=1)
+    def process(self, consumer_records: List[ConsumerRecord]):
+
+        sink_record_dto_list: List[SinkRecordDTO] = []
+
+        for consumer_record in consumer_records:
+            try:
+                sink_record_dto: SinkRecordDTO = self.stream_transformer.transform(consumer_record)
+                sink_record_dto_list.append(sink_record_dto)
+            except Exception as e:
+                self.handle_dlq_push(consumer_record.key, consumer_record.value,
+                                     consumer_record.topic, consumer_record.partition,
+                                     'TRANSFORM', e, consumer_record.offset)
+
+            try:
+                for stream_writer in self.sink_stream_writers:
+                    stream_writer.write(sink_record_dto_list)
+            except Exception as e:
+                self.handle_dlq_push(consumer_record.key, consumer_record.value,
+                                     consumer_record.topic, consumer_record.partition,
+                                     'SINK_UPDATE', e, consumer_record.offset)
+
+    def handle_dlq_push(self, key: str, message: str, topic: str, partition: int,
+                        failed_at: str, error: Exception, offset: int):
+        print(f'failed to {failed_at} key: {key} and message: {message}, in topic {topic} '
+              f'having offset {offset}, with error: {error}')
+        try:
+            if self.dlq_stream_writer is not None:
+                dead_letter = DeadLetterDTO(key=key, message=message, topic=topic,
+                                            partition=partition, failed_at=failed_at,
+                                            error=str(error) if error is not None else "",
+                                            offset=offset)
+                self.dlq_stream_writer.write([dead_letter])
+        except Exception as e:
+            print(f'Failed to write to DLQ: {e}')

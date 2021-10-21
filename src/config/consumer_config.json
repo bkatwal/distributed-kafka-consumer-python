@@ -1,0 +1,28 @@
+[
+  {
+    "consumer_name": "some_consumer_group_name",
+    "topic_name": "first-topic",
+    "number_of_workers": 2,
+    "enable_auto_commit": false,
+    "bootstrap_servers": "localhost:9092",
+    "key_deserializer": "STRING_DES",
+    "value_deserializer": "STRING_DES",
+    "header_deserializer": null,
+    "auto_offset_reset": "earliest",
+    "max_poll_records": 20,
+    "max_poll_interval_ms": 60000,
+    "sink_configs": {
+      "transformer_cls": "src.transformers.test_transformer.SampleTransformer"
+    },
+    "dlq_config": {
+      "bootstrap_servers": "localhost:9092",
+      "topic_name": "test-dlq",
+      "key_serializer": "STRING_SER",
+      "value_serializer": "STRING_SER",
+      "acks": "all",
+      "compression_type": "gzip",
+      "retries": 3,
+      "linger_ms": 10
+    }
+  }
+]
