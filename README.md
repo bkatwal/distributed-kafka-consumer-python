@@ -1,9 +1,10 @@
 ## Distributed Kafka Consumer Using Ray
 Using this project you can create a distributed Kafka Consumers, with the specified number of 
-consumers that run on multiple nodes. 
-
-This provides an API support to manage your consumers. Operations like - starting/stopping 
+consumers that run on multiple nodes and provides an API support to manage your consumers. 
+Operations like - starting/stopping
 consumers.
+
+This project uses [Ray](https://docs.ray.io/) to create distributed kafka Consumers
 
 ### Setup Instructions
 
