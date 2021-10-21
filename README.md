@@ -58,7 +58,13 @@ For available Serializers/deserializers refer [ser_des_util.py](https://github.c
 
 Rest of the configs are self explanatory. 
 
-**<ins>Step: 3 - Run the APP</ins>**
+**<ins>Step: 3 - Install the Requirements</ins>**
+Install [requirement.txt](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/requirements.txt)
+```shell
+pip install -r <path/to/requirement.txt>
+```
+
+**<ins>Step: 4 - Run the APP</ins>**
 ```shell
 uvicorn src.event_consumer_app:app --port <port> --reload
 ```
