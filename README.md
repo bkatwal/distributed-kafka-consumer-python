@@ -53,7 +53,7 @@ Config Name|Description|default value|Is mandatory?|
 -----------|-----------|------------|--------------|
 consumer_name|This will be used as consumer group name| |Yes
 number_of_workers|Number of consumers to create for a consumer group|1|No
-sink_configs|Any config related to your sink task. Say, if your are writing to Elasticsearch then you may want to give ES endpoint| |Yes
+sink_configs|Any config related to your sink task. Say, if your are writing to Elasticsearch then you may want to add ES endpoint in config| |Yes
 dlq_config|Dead letter queue config| |No
 For available Serializers/deserializers refer [ser_des_util.py](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/src/kafka_core/ser_des_util.py)
 
