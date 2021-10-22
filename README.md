@@ -60,7 +60,8 @@ For available Serializers/deserializers refer [ser_des_util.py](https://github.c
 Rest of the configs are self explanatory. 
 
 **<ins>Step: 3 - Install the Requirements</ins>**
-Install [requirement.txt](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/requirements.txt)
+
+Install all dependencies in [requirement.txt](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/requirements.txt)
 ```shell
 pip install -r <path/to/requirement.txt>
 ```
