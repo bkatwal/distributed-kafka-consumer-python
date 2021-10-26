@@ -8,6 +8,7 @@ import ray
 from kafka import KafkaConsumer
 from ray.actor import ActorHandle
 
+from src import WORKER_NUM_CPUS
 from src.config.common_config import CLIENT_ID, SECURITY_PROTOCOL, AUTH_MECHANISM
 from src.exceptions.usi_exceptions import BadInput
 from src.kafka_core.kafka_util import get_start_end_offsets
@@ -237,7 +238,7 @@ class SeekConsumerWorker(threading.Thread):
                 print(e)
 
 
-@ray.remote(max_restarts=2, max_task_retries=2)
+@ray.remote(max_restarts=2, max_task_retries=2, num_cpus=WORKER_NUM_CPUS)
 class ConsumerWorker:
     def __init__(self, config: dict, worker_name: str):
         self.consumer_name = config.get('consumer_name')
