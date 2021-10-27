@@ -1,3 +1,4 @@
+import time
 from abc import ABC
 from typing import List
 
@@ -5,10 +6,10 @@ from kafka.consumer.fetcher import ConsumerRecord
 from ratelimit import limits, sleep_and_retry
 
 from src.api.stream_writer import StreamWriter
-from src.es_core.console_stream_writer import ConsoleStreamWriter
 from src.exceptions.usi_exceptions import BadConsumerConfigException
 from src.kafka_core.kafka_stream_writer import KafkaStreamWriter
 from src.model.worker_dto import DeadLetterDTO, SinkRecordDTO
+from src.stream_writeres.console_stream_writer import ConsoleStreamWriter
 from src.transformers.transformer_util import get_transformer
 
 ONE_SECOND = 1
@@ -31,6 +32,23 @@ class SinkTask(ABC):
         if config.get('dlq_config') is not None:
             self.dlq_stream_writer: KafkaStreamWriter[DeadLetterDTO] = KafkaStreamWriter(
                 config.get('dlq_config'))
+        self.retries = self.sink_configs.get('num_retries', 3)
+        self.retry_delay_seconds = self.sink_configs.get('retry_delay_seconds', 1)
+
+    def write_to_sink(self, sink_record_dto_list: List[SinkRecordDTO]):
+        for stream_writer in self.sink_stream_writers:
+            retries = 0
+            while retries <= self.retries:
+                try:
+                    stream_writer.write(sink_record_dto_list)
+                    break
+                except Exception as e:
+                    if retries == self.retries:
+                        raise e
+                    retries = retries + 1
+                    print(f'{type(stream_writer)} - Failed with exception: {e}, retrying attempt'
+                          f' {retries}')
+                    time.sleep(self.retry_delay_seconds)
 
     @sleep_and_retry
     @limits(calls=CALLS, period=1)
@@ -48,8 +66,7 @@ class SinkTask(ABC):
                                      'TRANSFORM', e, consumer_record.offset)
 
             try:
-                for stream_writer in self.sink_stream_writers:
-                    stream_writer.write(sink_record_dto_list)
+                self.write_to_sink(sink_record_dto_list)
             except Exception as e:
                 self.handle_dlq_push(consumer_record.key, consumer_record.value,
                                      consumer_record.topic, consumer_record.partition,

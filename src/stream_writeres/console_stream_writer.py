@@ -13,6 +13,7 @@ class ConsoleStreamWriter(StreamWriter):
         :return: None
         """
         for sink_record_dto in streams:
+            raise Exception('some test')
             print(f'Key: {sink_record_dto.key} - value: {sink_record_dto.message}')
 
     def close(self) -> None:

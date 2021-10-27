@@ -8,8 +8,8 @@ import ray
 from kafka import KafkaConsumer
 from ray.actor import ActorHandle
 
-from src import WORKER_NUM_CPUS
-from src.config.common_config import CLIENT_ID, SECURITY_PROTOCOL, AUTH_MECHANISM
+from src import WORKER_NUM_CPUS, SASL_USERNAME, SASL_PASSWORD, SECURITY_PROTOCOL, SASL_MECHANISM
+from src.config.common_config import CLIENT_ID
 from src.exceptions.usi_exceptions import BadInput
 from src.kafka_core.kafka_util import get_start_end_offsets
 from src.kafka_core.ser_des_util import get_ser_des
@@ -26,10 +26,10 @@ class ConsumerWorkerManager:
 
     def __init__(self):
         self.consumer_worker_container: Dict[str, List[ActorHandle]] = {}
+        self.seek_consumer_worker_container: Dict[str, SeekConsumerWorker] = {}
         self.config_manager = ConfigManager()
         self.worker_configs = self.config_manager.get_worker_config()
         self.init_container()
-        self.seek_workers = set()
 
     def init_container(self) -> None:
         for worker_config in self.worker_configs:
@@ -124,28 +124,34 @@ class ConsumerWorkerManager:
         :return: None
         """
 
-        if name in self.seek_workers:
+        if name in self.seek_consumer_worker_container:
             raise BadInput(f'One seek task for the consumer {name}, is already running.')
 
-        self.seek_workers.add(name)
-        worker_name = name + '-' + str(uuid.uuid4())
+        try:
+            self.seek_consumer_worker_container[name] = None
+            worker_name = name + '-' + str(uuid.uuid4())
 
-        if stop_regular:
-            self.stop_worker(name)
+            if stop_regular:
+                self.stop_worker(name)
 
-        if not end_timestamp:
-            end_timestamp = int(time.time() * 1000)
+            if not end_timestamp:
+                end_timestamp = int(time.time() * 1000)
 
-        worker = SeekConsumerWorker(self.config_manager.get_worker_config_by_name(name),
-                                    start_timestamp, end_timestamp, seek_consumer_name=worker_name)
+            worker = SeekConsumerWorker(self.config_manager.get_worker_config_by_name(name),
+                                        start_timestamp, end_timestamp,
+                                        seek_consumer_name=worker_name)
 
-        self.consumer_worker_container[worker_name] = worker
-        worker.start()
-        worker.join()
-        if stop_regular:
-            self.start_worker(name)
+            self.seek_consumer_worker_container[name] = worker
+            worker.start()
+            worker.join()
+        except Exception as e:
+            print(f'Failed to consume data from previous timestamp: {e}')
+            raise e
+        finally:
+            if stop_regular:
+                self.start_worker(name)
 
-        self.seek_workers.remove(name)
+            self.seek_consumer_worker_container.pop(name)
 
 
 class SeekConsumerWorker(threading.Thread):
@@ -175,7 +181,7 @@ class SeekConsumerWorker(threading.Thread):
                                       max_poll_interval_ms=self.config.get('max_poll_interval_ms',
                                                                            600000),
                                       security_protocol=SECURITY_PROTOCOL,
-                                      sasl_mechanism=AUTH_MECHANISM,
+                                      sasl_mechanism=SASL_MECHANISM,
                                       consumer_timeout_ms=1000)
         self.consumer.subscribe([self.config.get('topic_name')])
 
@@ -266,7 +272,9 @@ class ConsumerWorker:
                                       max_poll_interval_ms=self.config.get('max_poll_interval_ms',
                                                                            600000),
                                       security_protocol=SECURITY_PROTOCOL,
-                                      sasl_mechanism=AUTH_MECHANISM,
+                                      sasl_mechanism=SASL_MECHANISM,
+                                      sasl_plain_username=SASL_USERNAME,
+                                      sasl_plain_password=SASL_PASSWORD,
                                       consumer_timeout_ms=1000)
         self.consumer.subscribe([self.config.get('topic_name')])
         print(f'Started consumer worker {self.worker_name}')
