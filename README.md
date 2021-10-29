@@ -19,7 +19,8 @@ One example transformer is defined [here](https://github.com/bkatwal/distributed
 
 One Example config is defined [here](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/src/config/consumer_config.json). 
 ```json
-{
+[
+  {
     "consumer_name": "some_consumer_group_name",
     "topic_name": "first-topic",
     "number_of_workers": 2,
@@ -34,7 +35,10 @@ One Example config is defined [here](https://github.com/bkatwal/distributed-kafk
     "sink_configs": {
       "transformer_cls": "src.transformers.test_transformer.SampleTransformer",
       "num_retries": 3,
-      "retry_delay_seconds" : 1
+      "retry_delay_seconds": 1,
+      "stream_writers": [
+        "src.stream_writers.console_stream_writer.ConsoleStreamWriter"
+      ]
     },
     "dlq_config": {
       "bootstrap_servers": "localhost:9092",
@@ -47,6 +51,8 @@ One Example config is defined [here](https://github.com/bkatwal/distributed-kafk
       "linger_ms": 10
     }
   }
+]
+
 ```
 
 Config info
