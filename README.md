@@ -32,7 +32,9 @@ One Example config is defined [here](https://github.com/bkatwal/distributed-kafk
     "max_poll_records": 20,
     "max_poll_interval_ms": 60000,
     "sink_configs": {
-      "transformer_cls": "src.transformers.test_transformer.SampleTransformer"
+      "transformer_cls": "src.transformers.test_transformer.SampleTransformer",
+      "num_retries": 3,
+      "retry_delay_seconds" : 1
     },
     "dlq_config": {
       "bootstrap_servers": "localhost:9092",
