@@ -5,12 +5,11 @@ from typing import List
 from kafka.consumer.fetcher import ConsumerRecord
 from ratelimit import limits, sleep_and_retry
 
-from src.stream_writeres.stream_writer import StreamWriter
 from src.exceptions.usi_exceptions import BadConsumerConfigException
 from src.kafka_core.kafka_stream_writer import KafkaStreamWriter
 from src.model.worker_dto import DeadLetterDTO, SinkRecordDTO
-from src.stream_writeres.console_stream_writer import ConsoleStreamWriter
-from src.transformers.transformer_util import get_transformer
+from src.stream_writers.stream_writer import StreamWriter, get_stream_writers
+from src.transformers.transformer import get_transformer
 
 ONE_SECOND = 1
 CALLS = 20
@@ -26,9 +25,13 @@ class SinkTask(ABC):
         processor_cls_path = self.sink_configs.get('transformer_cls')
         if not processor_cls_path:
             raise BadConsumerConfigException('sink_configs.transformer_cls is a mandatory config')
-        self.stream_transformer = get_transformer(processor_cls_path)
+        self.stream_transformer = get_transformer(processor_cls_path, self.sink_configs)
         self.operation_extractor = None
-        self.sink_stream_writers: List[StreamWriter] = [ConsoleStreamWriter()]
+        stream_writer_cls_paths: List[str] = self.sink_configs.get('stream_writers')
+        if not stream_writer_cls_paths or len(stream_writer_cls_paths) == 0:
+            raise BadConsumerConfigException('sink_configs.stream_writers is a mandatory config')
+        self.sink_stream_writers: List[StreamWriter] = get_stream_writers(
+            stream_writer_cls_paths, self.sink_configs)
         if config.get('dlq_config') is not None:
             self.dlq_stream_writer: KafkaStreamWriter[DeadLetterDTO] = KafkaStreamWriter(
                 config.get('dlq_config'))

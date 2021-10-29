@@ -1,7 +1,7 @@
 from typing import List
 
-from src.stream_writeres.stream_writer import StreamWriter
 from src.model.worker_dto import SinkRecordDTO
+from src.stream_writers.stream_writer import StreamWriter
 
 
 class ConsoleStreamWriter(StreamWriter):

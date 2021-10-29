@@ -14,7 +14,10 @@
     "sink_configs": {
       "transformer_cls": "src.transformers.test_transformer.SampleTransformer",
       "num_retries": 3,
-      "retry_delay_seconds" : 1
+      "retry_delay_seconds": 1,
+      "stream_writers": [
+        "src.stream_writers.console_stream_writer.ConsoleStreamWriter"
+      ]
     },
     "dlq_config": {
       "bootstrap_servers": "localhost:9092",
