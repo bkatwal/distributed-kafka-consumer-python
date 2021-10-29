@@ -5,7 +5,7 @@ from typing import List
 from kafka.consumer.fetcher import ConsumerRecord
 from ratelimit import limits, sleep_and_retry
 
-from src.api.stream_writer import StreamWriter
+from src.stream_writeres.stream_writer import StreamWriter
 from src.exceptions.usi_exceptions import BadConsumerConfigException
 from src.kafka_core.kafka_stream_writer import KafkaStreamWriter
 from src.model.worker_dto import DeadLetterDTO, SinkRecordDTO

@@ -1,6 +1,6 @@
 from typing import List
 
-from src.api.stream_writer import StreamWriter
+from src.stream_writeres.stream_writer import StreamWriter
 from src.model.worker_dto import SinkRecordDTO
 
 
