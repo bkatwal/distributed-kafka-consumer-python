@@ -36,30 +36,35 @@ def on_shutdown():
     cwm.start_all_workers()
 
 
-@app.get('/event-consumer/knockknock', include_in_schema=False)
+@app.post('/event-consumer/knockknock', include_in_schema=False)
 def health():
     return {'message': 'Who\'s there?'}
 
 
-@app.get('/event-consumer/start-consumers', dependencies=[Depends(authorize)])
+@app.post('/event-consumer/start-consumers', dependencies=[Depends(authorize)])
 def start_consumers():
     cwm.start_all_workers()
     return "Successfully started all workers!"
 
 
-@app.get('/event-consumer/start-consumer/{consumer_name}', dependencies=[Depends(authorize)])
+@app.get('/event-consumers', dependencies=[Depends(authorize)])
+def start_consumers():
+    return cwm.get_all_running_consumer()
+
+
+@app.post('/event-consumer/start-consumer/{consumer_name}', dependencies=[Depends(authorize)])
 def start_consumer(consumer_name):
     cwm.start_worker(consumer_name)
     return "Successfully started worker!"
 
 
-@app.get('/event-consumer/stop-consumers', dependencies=[Depends(authorize)])
+@app.post('/event-consumer/stop-consumers', dependencies=[Depends(authorize)])
 def stop_consumers():
     cwm.stop_all_workers()
     return "Successfully Stopped all workers!"
 
 
-@app.get('/event-consumer/stop-consumer/{consumer_name}', dependencies=[Depends(authorize)])
+@app.post('/event-consumer/stop-consumer/{consumer_name}', dependencies=[Depends(authorize)])
 def stop_consumer(consumer_name):
     cwm.stop_worker(consumer_name)
     return "Successfully Stopped!"

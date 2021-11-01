@@ -52,6 +52,12 @@ class ConsumerWorkerManager:
 
         print("All consumer workers stopped.")
 
+    def get_all_running_consumer(self):
+        result: dict = {}
+        for key, value in self.consumer_worker_container.items():
+            result[key] = len(value)
+        return result
+
     def start_all_workers(self):
         for worker_config in self.worker_configs:
 
