@@ -11,13 +11,13 @@ This project uses [Ray](https://docs.ray.io/) to create distributed kafka Consum
 **<ins>Step 1 - Create Your Transformer Class</ins>**
 
 To create a new transformer implement the abstract class [StreamTransformer](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/src/transformers/transformer.py) and use 
-this new transformer in [worker config](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/src/config/consumer_config.json).
+this new transformer in [worker config](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/config/consumer_config.json).
 
 One example transformer is defined [here](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/src/transformers/test_transformer.py)
 
 **<ins>Step 2 - Create your worker config</ins>**
 
-One Example config is defined [here](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/src/config/consumer_config.json). 
+One Example config is defined [here](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/config/consumer_config.json). 
 ```json
 [
   {
@@ -95,7 +95,7 @@ If running in local, run below command:
 Variable Name|Description|Is Mandatory?|Default Value|
 -------------|------------|------------|-------------|
 RAY_HEAD_ADDRESS|Ex: `ray://192.168.0.19:10001`. Avoid creating this env variable, if head and driver/app running on same node|No|auto|
-WORKER_CONFIG_PATH|worker [json conig](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/src/config/consumer_config.json) path|Yes||
+WORKER_CONFIG_PATH|worker [json conig](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/config/consumer_config.json) path|Yes||
 APP_USERNAME|Username to setup Basic API Authentication|No|admin|
 APP_PASSWORD|Password to setup Basic API Authentication|No|admin|
 WORKER_NUM_CPUS|Number of CPUs to reserve per Consumer/Worker|No|0.25|
