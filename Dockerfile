@@ -1,3 +1,5 @@
+## Dockerfile should be used only if the application need to be deployed outside of ray head node
+
 FROM python:3.8.5-slim
 
 ### common steps start
