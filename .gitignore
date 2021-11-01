@@ -19,6 +19,8 @@ dist/
 # Package files
 *.jar
 
+*.iml
+
 # Maven
 target/
 dist/
