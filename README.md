@@ -11,13 +11,13 @@ This project uses [Ray](https://docs.ray.io/) to create distributed kafka Consum
 **<ins>Step 1 - Create Your Transformer Class</ins>**
 
 To create a new transformer implement the abstract class [StreamTransformer](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/src/transformers/transformer.py) and use 
-this new transformer in [worker config](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/src/config/consumer_config.json).
+this new transformer in [worker config](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/config/consumer_config.json).
 
 One example transformer is defined [here](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/src/transformers/test_transformer.py)
 
 **<ins>Step 2 - Create your worker config</ins>**
 
-One Example config is defined [here](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/src/config/consumer_config.json). 
+One Example config is defined [here](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/config/consumer_config.json). 
 ```json
 [
   {
