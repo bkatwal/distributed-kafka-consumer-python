@@ -1,3 +1,8 @@
+import uuid
+
+CLIENT_ID = str(uuid.uuid4())
+
+
 def singleton(cls):
     instances = {}
 

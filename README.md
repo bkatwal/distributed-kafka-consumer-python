@@ -74,10 +74,28 @@ Install all dependencies in [requirement.txt](https://github.com/bkatwal/distrib
 pip install -r <path/to/requirement.txt>
 ```
 
-**<ins>Step 4 - Set necessary Environment Variables</ins>**
+Install the code using `setup.py`.
+This is needed for ray to find modules to pickle/unpickle.
+
+Go to project root folder, where setup.py exists and run:
+```shell
+ pip install -e .
+```
+
+**<ins>Step 4 - Start ray head node</ins>**
+
+If running in local, run below command:
+```shell
+ ray start --head --port=6379
+```
+
+
+**<ins>Step 5 - Set necessary Environment Variables</ins>**
 
 Variable Name|Description|Is Mandatory?|Default Value|
 -------------|------------|------------|-------------|
+RAY_HEAD_ADDRESS|Ex: ray://192.168.0.19:10001. Leave blank if head and driver/app running on same node|No|auto|
+WORKER_CONFIG_PATH|worker [json conig](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/src/config/consumer_config.json) path|Yes||
 APP_USERNAME|Username to setup Basic API Authentication|No|admin|
 APP_PASSWORD|Password to setup Basic API Authentication|No|admin|
 WORKER_NUM_CPUS|Number of CPUs to reserve per Consumer/Worker|No|0.25|
@@ -87,7 +105,7 @@ SASL_USERNAME|Pass SASL username if using SASL Auth to connect to Kafka|No|None|
 SASL_PASSWORD|Pass SASL password if using SASL Auth to connect to Kafka|No|None
 
 
-**<ins>Step 4 - Run the APP</ins>**
+**<ins>Step 6 - Run the APP</ins>**
 ```shell
 uvicorn src.event_consumer_app:app --port <port> --reload
 ```

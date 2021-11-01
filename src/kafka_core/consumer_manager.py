@@ -8,17 +8,21 @@ import ray
 from kafka import KafkaConsumer
 from ray.actor import ActorHandle
 
-from src import WORKER_NUM_CPUS, SASL_USERNAME, SASL_PASSWORD, SECURITY_PROTOCOL, SASL_MECHANISM
-from src.config.common_config import CLIENT_ID
+from src import WORKER_NUM_CPUS, SASL_USERNAME, SASL_PASSWORD, SECURITY_PROTOCOL, SASL_MECHANISM, \
+    RAY_HEAD_ADDRESS
 from src.exceptions.usi_exceptions import BadInput
 from src.kafka_core.kafka_util import get_start_end_offsets
 from src.kafka_core.ser_des_util import get_ser_des
 from src.kafka_core.sink_task import SinkTask
-from src.utility.common_util import singleton
+from src.utility.common_util import singleton, CLIENT_ID
 from src.utility.config_manager import ConfigManager
 
 TWO_MINUTES = 2
-ray.init()
+ray.init(address=RAY_HEAD_ADDRESS)
+print('''This cluster consists of
+    {} nodes in total
+    {} CPU resources in total
+'''.format(len(ray.nodes()), ray.cluster_resources()['CPU']))
 
 
 @singleton

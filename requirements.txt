@@ -6,3 +6,4 @@ pydantic~=1.7.4
 newrelic~=6.8.0.163
 ratelimit==2.2.1
 ray==1.7.0
+setuptools==58.4.0

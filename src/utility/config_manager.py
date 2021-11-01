@@ -2,7 +2,7 @@ import copy
 import json
 import os
 
-from src import ROOT_SRC_DIR
+from src import WORKER_CONFIG_PATH, ROOT_SRC_DIR
 from src.exceptions.usi_exceptions import BadInput
 from src.utility.common_util import singleton
 
@@ -18,8 +18,7 @@ class ConfigManager:
         self._load_consumer_config()
 
     def _load_consumer_config(self) -> None:
-        config_file = ROOT_SRC_DIR + "/config/consumer_config.json"
-        with open(config_file, "r") as f:
+        with open(ROOT_SRC_DIR + WORKER_CONFIG_PATH, "r") as f:
             self._worker_config = json.load(f)
 
     def get_worker_config(self) -> list:

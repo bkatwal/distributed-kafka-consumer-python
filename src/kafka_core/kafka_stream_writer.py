@@ -4,9 +4,9 @@ from typing import TypeVar, Generic, List
 from kafka import KafkaProducer
 
 from src.stream_writers.stream_writer import StreamWriter
-from src.config.common_config import CLIENT_ID
 from src.exceptions.usi_exceptions import BadConsumerConfigException
 from src.kafka_core.ser_des_util import get_ser_des
+from src.utility.common_util import CLIENT_ID
 
 T = TypeVar('T')
 
