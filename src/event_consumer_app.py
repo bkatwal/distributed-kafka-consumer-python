@@ -1,3 +1,4 @@
+import logging
 import secrets
 
 from fastapi import FastAPI, Depends, HTTPException, status
@@ -6,8 +7,10 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from src import USERNAME, PASSWORD
-from src.exceptions.usi_exceptions import BadInput, USIException
+from src.exceptions.usi_exceptions import BadInput, GenericException
 from src.kafka_core.consumer_manager import ConsumerWorkerManager
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Universal Search Event Consumer")
 security = HTTPBasic()
@@ -72,16 +75,16 @@ def stop_consumer(consumer_name):
 
 @app.exception_handler(Exception)
 def generic_exception_handler(request: Request, exc: Exception):
-    print(exc)
+    logger.error(exc)
     return JSONResponse(
         status_code=500,
         content={"message": "Oops! I messed up!"},
     )
 
 
-@app.exception_handler(USIException)
-def request_validation_exception_handler(request: Request, exc: USIException):
-    print(exc)
+@app.exception_handler(GenericException)
+def request_validation_exception_handler(request: Request, exc: GenericException):
+    logger.error(exc)
     return JSONResponse(
         status_code=500,
         content={"message": exc.message},
@@ -90,7 +93,7 @@ def request_validation_exception_handler(request: Request, exc: USIException):
 
 @app.exception_handler(BadInput)
 def request_validation_exception_handler(request: Request, exc: BadInput):
-    print(exc)
+    logger.error(exc)
     return JSONResponse(
         status_code=422,
         content={"message": exc.message},

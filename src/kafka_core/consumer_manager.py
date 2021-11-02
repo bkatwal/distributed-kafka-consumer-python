@@ -1,4 +1,5 @@
 import itertools
+import logging
 import threading
 import time
 import uuid
@@ -17,6 +18,8 @@ from src.kafka_core.sink_task import SinkTask
 from src.utility.common_util import singleton, CLIENT_ID
 from src.utility.config_manager import ConfigManager
 
+logger = logging.getLogger(__name__)
+
 TWO_MINUTES = 2
 
 if LOCAL_MODE == 'Y':
@@ -24,7 +27,7 @@ if LOCAL_MODE == 'Y':
 else:
     ray.init(address=RAY_HEAD_ADDRESS)
 
-print('''This cluster consists of
+logger.info('''This cluster consists of
     {} nodes in total
     {} CPU resources in total
 '''.format(len(ray.nodes()), ray.cluster_resources()['CPU']))
@@ -55,7 +58,7 @@ class ConsumerWorkerManager:
                 ray.kill(worker_actor)
             self.consumer_worker_container[worker_name] = []
 
-        print("All consumer workers stopped.")
+        logger.info("All consumer workers stopped.")
 
     def get_all_running_consumer(self):
         result: dict = {}
@@ -78,7 +81,7 @@ class ConsumerWorkerManager:
                     worker_actor.run.remote()
                     self.consumer_worker_container[worker_config.get('consumer_name')].append(
                         worker_actor)
-        print("All consumer workers started.")
+        logger.info("All consumer workers started.")
 
     def start_worker(self, name: str) -> None:
         if name not in self.consumer_worker_container:
@@ -99,7 +102,7 @@ class ConsumerWorkerManager:
             i = i + 1
             self.consumer_worker_container[name].append(worker_actor)
             worker_actor.run.remote()
-        print(f"{num_workers} workers of worker group {name} started.")
+        logger.info(f"{num_workers} workers of worker group {name} started.")
 
     def stop_worker(self, name: str) -> None:
         if name not in self.consumer_worker_container:
@@ -117,7 +120,7 @@ class ConsumerWorkerManager:
 
             ray.kill(worker_actor)
         self.consumer_worker_container[name] = []
-        print(f"{name} consumer worker stopped.")
+        logger.info(f"{name} consumer worker stopped.")
 
     def start_worker_with_timestamp(self, name: str, start_timestamp: int, end_timestamp: int,
                                     stop_regular=False) -> None:
@@ -160,7 +163,7 @@ class ConsumerWorkerManager:
             worker.start()
             worker.join()
         except Exception as e:
-            print(f'Failed to consume data from previous timestamp: {e}')
+            logger.error(f'Failed to consume data from previous timestamp: {e}')
             raise e
         finally:
             if stop_regular:
@@ -251,12 +254,12 @@ class SeekConsumerWorker(threading.Thread):
 
                 if self.is_all_partitions_read(tp_break_flag):
                     self.consumer.close()
-                    print(
+                    logger.info(
                         f'stopping seek consumer {self.consumer_name}, '
                         f'total records processed: {total_processed}')
                     break
             except BaseException as e:
-                print(e)
+                logger.error(e)
 
 
 @ray.remote(max_restarts=2, max_task_retries=2, num_cpus=WORKER_NUM_CPUS)
@@ -292,15 +295,15 @@ class ConsumerWorker:
                                       sasl_plain_password=SASL_PASSWORD,
                                       consumer_timeout_ms=1000)
         self.consumer.subscribe([self.config.get('topic_name')])
-        print(f'Started consumer worker {self.worker_name}')
+        logger.info(f'Started consumer worker {self.worker_name}')
 
     def stop_consumer(self) -> None:
-        print(f'Stopping consumer worker {self.worker_name}')
+        logger.info(f'Stopping consumer worker {self.worker_name}')
         self.stop_worker = True
 
         # give time for the consumer to stop gracefully
         time.sleep(self.consumer_stop_delay_seconds)
-        print(f'Stopped consumer worker {self.worker_name}')
+        logger.info(f'Stopped consumer worker {self.worker_name}')
 
     def closed(self):
         return self.is_closed
@@ -324,4 +327,5 @@ class ConsumerWorker:
                     self.is_closed = True
                     break
             except BaseException as e:
-                print(e)
+                logger.error('Error while running consumer worker!')
+                logger.error(e)

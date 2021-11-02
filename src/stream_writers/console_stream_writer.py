@@ -1,7 +1,10 @@
+import logging
 from typing import List
 
 from src.model.worker_dto import SinkRecordDTO
 from src.stream_writers.stream_writer import StreamWriter
+
+logger = logging.getLogger(__name__)
 
 
 class ConsoleStreamWriter(StreamWriter):
@@ -13,7 +16,7 @@ class ConsoleStreamWriter(StreamWriter):
         :return: None
         """
         for sink_record_dto in streams:
-            print(f'Key: {sink_record_dto.key} - value: {sink_record_dto.message}')
+            logger.info(f' Key: {sink_record_dto.key} - value: {sink_record_dto.message}')
 
     def close(self) -> None:
         pass

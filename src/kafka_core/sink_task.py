@@ -1,3 +1,4 @@
+import logging
 import time
 from abc import ABC
 from typing import List
@@ -10,6 +11,8 @@ from src.kafka_core.kafka_stream_writer import KafkaStreamWriter
 from src.model.worker_dto import DeadLetterDTO, SinkRecordDTO
 from src.stream_writers.stream_writer import StreamWriter, get_stream_writers
 from src.transformers.transformer import get_transformer
+
+logger = logging.getLogger(__name__)
 
 ONE_SECOND = 1
 CALLS = 20
@@ -49,8 +52,9 @@ class SinkTask(ABC):
                     if retries == self.retries:
                         raise e
                     retries = retries + 1
-                    print(f'{type(stream_writer)} - Failed with exception: {e}, retrying attempt'
-                          f' {retries}')
+                    logger.error(f'{type(stream_writer)} - Failed with exception: {e}, retrying '
+                                 f'attempt'
+                                 f' {retries}')
                     time.sleep(self.retry_delay_seconds)
 
     @sleep_and_retry
@@ -77,8 +81,8 @@ class SinkTask(ABC):
 
     def handle_dlq_push(self, key: str, message: str, topic: str, partition: int,
                         failed_at: str, error: Exception, offset: int):
-        print(f'failed to {failed_at} key: {key} and message: {message}, in topic {topic} '
-              f'having offset {offset}, with error: {error}')
+        logger.warning(f'failed to {failed_at} key: {key} and message: {message}, in topic {topic} '
+                       f'having offset {offset}, with error: {error}')
         try:
             if self.dlq_stream_writer is not None:
                 dead_letter = DeadLetterDTO(key=key, message=message, topic=topic,
@@ -87,4 +91,4 @@ class SinkTask(ABC):
                                             offset=offset)
                 self.dlq_stream_writer.write([dead_letter])
         except Exception as e:
-            print(f'Failed to write to DLQ: {e}')
+            logger.error(f'Failed to write to DLQ: {e}')

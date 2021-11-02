@@ -1,7 +1,7 @@
 [
   {
     "consumer_name": "some_consumer_group_name",
-    "topic_name": "first-topic",
+    "topic_name": "test-topic",
     "number_of_workers": 2,
     "enable_auto_commit": false,
     "bootstrap_servers": "localhost:9092",

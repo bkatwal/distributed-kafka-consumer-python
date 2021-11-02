@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-class USIException(Exception):
+class GenericException(Exception):
 
     def __init__(self, message):
         super().__init__(message)
@@ -9,7 +9,7 @@ class USIException(Exception):
         self.when = datetime.now()
 
 
-class BadConsumerConfigException(USIException):
+class BadConsumerConfigException(GenericException):
 
     def __init__(self, message):
         super().__init__(message)
@@ -17,7 +17,7 @@ class BadConsumerConfigException(USIException):
         self.when = datetime.now()
 
 
-class BadInput(USIException):
+class BadInput(GenericException):
 
     def __init__(self, message):
         super().__init__(message)
