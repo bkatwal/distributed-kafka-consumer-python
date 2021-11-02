@@ -94,6 +94,7 @@ If running in local, run below command:
 
 Variable Name|Description|Is Mandatory?|Default Value|
 -------------|------------|------------|-------------|
+LOCAL_MODE| `Y` or `N`. Tells weather to run Kafka Consumer in single node or in a distributed setup.|N|Y|
 RAY_HEAD_ADDRESS|Ex: `ray://192.168.0.19:10001`. Avoid creating this env variable, if head and driver/app running on same node|No|auto|
 WORKER_CONFIG_PATH|worker [json conig](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/config/consumer_config.json) path|Yes||
 APP_USERNAME|Username to setup Basic API Authentication|No|admin|

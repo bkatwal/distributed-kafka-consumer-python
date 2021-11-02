@@ -9,7 +9,7 @@ from kafka import KafkaConsumer
 from ray.actor import ActorHandle
 
 from src import WORKER_NUM_CPUS, SASL_USERNAME, SASL_PASSWORD, SECURITY_PROTOCOL, SASL_MECHANISM, \
-    RAY_HEAD_ADDRESS
+    RAY_HEAD_ADDRESS, LOCAL_MODE
 from src.exceptions.usi_exceptions import BadInput
 from src.kafka_core.kafka_util import get_start_end_offsets
 from src.kafka_core.ser_des_util import get_ser_des
@@ -18,7 +18,12 @@ from src.utility.common_util import singleton, CLIENT_ID
 from src.utility.config_manager import ConfigManager
 
 TWO_MINUTES = 2
-ray.init(address=RAY_HEAD_ADDRESS)
+
+if LOCAL_MODE == 'Y':
+    ray.init()
+else:
+    ray.init(address=RAY_HEAD_ADDRESS)
+
 print('''This cluster consists of
     {} nodes in total
     {} CPU resources in total
