@@ -1,4 +1,3 @@
-import logging
 import secrets
 
 from fastapi import FastAPI, Depends, HTTPException, status
@@ -9,8 +8,9 @@ from starlette.responses import JSONResponse
 from src import USERNAME, PASSWORD
 from src.exceptions.usi_exceptions import BadInput, GenericException
 from src.kafka_core.consumer_manager import ConsumerWorkerManager
+from src.utility import logging_util
 
-logger = logging.getLogger(__name__)
+logger = logging_util.get_logger(__name__)
 
 app = FastAPI(title="Universal Search Event Consumer")
 security = HTTPBasic()

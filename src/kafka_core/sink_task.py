@@ -1,4 +1,3 @@
-import logging
 import time
 from abc import ABC
 from typing import List
@@ -11,8 +10,9 @@ from src.kafka_core.kafka_stream_writer import KafkaStreamWriter
 from src.model.worker_dto import DeadLetterDTO, SinkRecordDTO
 from src.stream_writers.stream_writer import StreamWriter, get_stream_writers
 from src.transformers.transformer import get_transformer
+from src.utility import logging_util
 
-logger = logging.getLogger(__name__)
+logger = logging_util.get_logger(__name__)
 
 ONE_SECOND = 1
 CALLS = 20
