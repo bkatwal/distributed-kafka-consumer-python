@@ -106,7 +106,7 @@ APP_USERNAME|Username to setup Basic API Authentication|No|admin|
 APP_PASSWORD|Password to setup Basic API Authentication|No|admin|
 WORKER_NUM_CPUS|Number of CPUs to reserve per Consumer/Worker|No|0.25|
 SECURITY_PROTOCOL|Pass the security protocol being used to connect to Kafka Brokers. Valid values are - PLAINTEXT, SASL_PLAINTEXT, SASL_SSL|No|None|
-SASL_MECHANISM|Using using SASL based Auth. Pass either of the valid values - PLAIN, SCRAM-SHA-256, SCRAM-SHA-512|No|None|
+SASL_MECHANISM|Using SASL based Auth. Pass either of the valid values - PLAIN, SCRAM-SHA-256, SCRAM-SHA-512|No|None|
 SASL_USERNAME|Pass SASL username if using SASL Auth to connect to Kafka|No|None|
 SASL_PASSWORD|Pass SASL password if using SASL Auth to connect to Kafka|No|None
 
