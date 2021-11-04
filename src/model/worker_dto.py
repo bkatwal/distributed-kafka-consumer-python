@@ -22,9 +22,6 @@ class SinkOperation(BaseModel):
     # this can be a json or any primitive value
     new_val: object = None
 
-    # if true uses message as doc, if false uses new_val in script-base update
-    use_doc_as_upsert: Optional[bool]
-
     class Config:
         arbitrary_types_allowed = True
 
