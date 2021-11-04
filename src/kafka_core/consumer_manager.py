@@ -22,10 +22,11 @@ logger = logging_util.get_logger(__name__)
 
 TWO_MINUTES = 2
 
-if LOCAL_MODE == 'Y':
+if LOCAL_MODE == 'Y' and False:
     ray.init()
 else:
-    ray.init(address=RAY_HEAD_ADDRESS)
+    # ray.init(address=RAY_HEAD_ADDRESS)
+    ray.init(address="ray://192.168.64.3:30001")
 
 print('''This cluster consists of
     {} nodes in total
