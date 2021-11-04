@@ -129,7 +129,16 @@ uvicorn src.event_consumer_app:app --port <port> --reload
  docker run -e RAY_HEAD_ADDRESS=ray://localhost:10001 -e LOCAL_MODE=N  -dp 8002:8002 kafka-connect-ray
 ```
 
+**IMPORTANT!!!!**
 
+While creating ray cluster make sure to install code dependencies by running below command in 
+your Node or VM or container:
+```shell
+pip install kafka-connect-dependency==0.1
+```
+This will let ray head and worker nodes find the modules. 
+
+This setup is added in Ray K8 [cluster config yaml](https://github.com/bkatwal/distributed-kafka-consumer-python/blob/main/k8/ray/ray-cluster-config.yaml#L74) file.
 
 ### License
 
