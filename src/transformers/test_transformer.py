@@ -16,8 +16,7 @@ class SampleTransformer(StreamTransformer):
         # do something here
         message_dict: dict = json.loads(consumer_record.value)
         sink_operation = SinkOperation(
-            sink_operation_type=SinkOperationType.UPSERT,
-            use_doc_as_upsert=True
+            sink_operation_type=SinkOperationType.UPSERT
         )
 
         return SinkRecordDTO(key=consumer_record.key,
