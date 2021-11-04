@@ -22,7 +22,7 @@ logger = logging_util.get_logger(__name__)
 
 TWO_MINUTES = 2
 
-if LOCAL_MODE == 'Y':
+if RAY_HEAD_ADDRESS is None and LOCAL_MODE == 'Y':
     ray.init()
 else:
     ray.init(address=RAY_HEAD_ADDRESS)
