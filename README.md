@@ -6,6 +6,11 @@ consumers.
 
 This project uses [Ray](https://docs.ray.io/) to create distributed kafka Consumers
 
+### System Requirements:
+Python Version: 3.7
+
+Ray version: 1.8.0
+
 ### Setup Instructions
 
 **<ins>Step 1 - Create Your Transformer Class</ins>**
@@ -105,11 +110,26 @@ SASL_MECHANISM|Using using SASL based Auth. Pass either of the valid values - PL
 SASL_USERNAME|Pass SASL username if using SASL Auth to connect to Kafka|No|None|
 SASL_PASSWORD|Pass SASL password if using SASL Auth to connect to Kafka|No|None
 
-
 **<ins>Step 6 - Run the APP</ins>**
 ```shell
 uvicorn src.event_consumer_app:app --port <port> --reload
 ```
+
+**Run App in docker container**
+
+<ins>Build Image</ins>
+```shell
+# run below in the project root folder
+ build -t kafka-connect-ray .
+```
+
+<ins>Run Image</ins>
+```shell
+# add other environment variables as you need.
+ docker run -e RAY_HEAD_ADDRESS=ray://localhost:10001 -e LOCAL_MODE=N  -dp 8002:8002 kafka-connect-ray
+```
+
+
 
 ### License
 
