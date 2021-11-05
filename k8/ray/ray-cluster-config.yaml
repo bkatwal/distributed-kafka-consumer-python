@@ -71,7 +71,7 @@ spec:
           args:
             - -c
             - >-
-              pip install kafka-connect-dependency==0.1 &&
+              pip install kafka-connect-dependency==0.1.1 &&
               ray start --head --port=6379 --redis-shard-ports=6380,6381 --num-cpus=$MY_CPU_REQUEST --object-manager-port=12345 --node-manager-port=12346 --dashboard-host=0.0.0.0 --block
           ports:
             - containerPort: 6379 # Redis port
@@ -128,7 +128,7 @@ spec:
           args:
             - -c
             - >-
-              pip install kafka-connect-dependency==0.1 &&
+              pip install kafka-connect-dependency==0.1.1 &&
               ray start --num-cpus=$MY_CPU_REQUEST --address=$EXAMPLE_CLUSTER_RAY_HEAD_SERVICE_HOST:$EXAMPLE_CLUSTER_RAY_HEAD_SERVICE_PORT_REDIS --object-manager-port=12345 --node-manager-port=12346 --block
           # This volume allocates shared memory for Ray to use for its plasma
           # object store. If you do not provide this, Ray will fall back to
