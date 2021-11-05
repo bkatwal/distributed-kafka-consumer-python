@@ -13,7 +13,7 @@ from src.utility import logging_util
 
 logger = logging_util.get_logger(__name__)
 
-app = FastAPI(title="Universal Search Event Consumer")
+app = FastAPI(title="Distributed Kafka Consumer Using Ray - Manager")
 security = HTTPBasic()
 cwm = ConsumerWorkerManager()
 
@@ -40,23 +40,23 @@ def on_shutdown():
     cwm.start_all_workers()
 
 
-@app.post('/event-consumer/knockknock', include_in_schema=False)
+@app.post('/manager/health', include_in_schema=False)
 def health():
-    return {'message': 'Who\'s there?'}
+    return {'message': 'App is up!'}
 
 
-@app.post('/event-consumer/start-consumers', dependencies=[Depends(authorize)])
+@app.post('/manager/start-consumers', dependencies=[Depends(authorize)])
 def start_consumers():
     cwm.start_all_workers()
     return "Successfully started all workers!"
 
 
-@app.get('/event-consumers', dependencies=[Depends(authorize)])
-def start_consumers():
+@app.get('/manager/fetch-consumers', dependencies=[Depends(authorize)])
+def get_consumers():
     return cwm.get_all_running_consumer()
 
 
-@app.post('/event-consumer/read-from-timestamp', dependencies=[Depends(authorize)])
+@app.post('/manager/read-from-timestamp', dependencies=[Depends(authorize)])
 def read_from_timestamp(consumer_name: str, start_timestamp: int,
                         end_timestamp: int = int(time.time() * 1000),
                         stop_running_consumer: bool = True):
@@ -65,19 +65,19 @@ def read_from_timestamp(consumer_name: str, start_timestamp: int,
     return "Successfully started!"
 
 
-@app.post('/event-consumer/start-consumer/{consumer_name}', dependencies=[Depends(authorize)])
+@app.post('/manager/start-consumer/{consumer_name}', dependencies=[Depends(authorize)])
 def start_consumer(consumer_name):
     cwm.start_worker(consumer_name)
     return "Successfully started worker!"
 
 
-@app.post('/event-consumer/stop-consumers', dependencies=[Depends(authorize)])
+@app.post('/manager/stop-consumers', dependencies=[Depends(authorize)])
 def stop_consumers():
     cwm.stop_all_workers()
     return "Successfully Stopped all workers!"
 
 
-@app.post('/event-consumer/stop-consumer/{consumer_name}', dependencies=[Depends(authorize)])
+@app.post('/manager/stop-consumer/{consumer_name}', dependencies=[Depends(authorize)])
 def stop_consumer(consumer_name):
     cwm.stop_worker(consumer_name)
     return "Successfully Stopped!"
