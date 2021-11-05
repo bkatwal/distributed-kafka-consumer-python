@@ -1,4 +1,5 @@
 import secrets
+import time
 
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -53,6 +54,15 @@ def start_consumers():
 @app.get('/event-consumers', dependencies=[Depends(authorize)])
 def start_consumers():
     return cwm.get_all_running_consumer()
+
+
+@app.post('/event-consumer/read-from-timestamp', dependencies=[Depends(authorize)])
+def read_from_timestamp(consumer_name: str, start_timestamp: int,
+                        end_timestamp: int = int(time.time() * 1000),
+                        stop_running_consumer: bool = True):
+    cwm.start_worker_with_timestamp(start_timestamp=start_timestamp, end_timestamp=end_timestamp,
+                                    stop_regular=stop_running_consumer, name=consumer_name)
+    return "Successfully started!"
 
 
 @app.post('/event-consumer/start-consumer/{consumer_name}', dependencies=[Depends(authorize)])
