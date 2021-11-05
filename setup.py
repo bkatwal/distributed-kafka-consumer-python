@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='kafka-connect-dependency',
-    version='0.1',
+    version='0.1.1',
     license='MIT',
     url='https://github.com/bkatwal/distributed-kafka-consumer-python',
     author='Bikas Katwal',

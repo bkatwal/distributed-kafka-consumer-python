@@ -134,7 +134,7 @@ uvicorn src.event_consumer_app:app --port <port> --reload
 While creating ray cluster make sure to install code dependencies by running below command in 
 your Node or VM or container:
 ```shell
-pip install kafka-connect-dependency==0.1
+pip install kafka-connect-dependency==0.1.1
 ```
 This will let ray head and worker nodes find the modules. 
 
