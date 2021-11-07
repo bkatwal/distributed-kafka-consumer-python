@@ -26,7 +26,6 @@ COPY --chown=app ./config ./config
 COPY --chown=app setup.cfg .
 COPY --chown=app setup.py .
 COPY --chown=app README.md .
-ARG BUILD_TIME=abc
 
 # install dependency requirements
 RUN pip install -r requirements.txt

@@ -65,7 +65,7 @@ spec:
             medium: Memory
       containers:
         - name: ray-head
-          image: rayproject/ray:latest
+          image: rayproject/ray:1.8.0
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash" ]
           args:
@@ -122,7 +122,7 @@ spec:
             medium: Memory
       containers:
         - name: ray-worker
-          image: rayproject/ray:latest
+          image: rayproject/ray:1.8.0
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash" ]
           args:
