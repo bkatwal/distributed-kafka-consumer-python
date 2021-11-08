@@ -36,7 +36,6 @@ setup(
         'cachetools~=4.2.2',
         'starlette~=0.14.2',
         'pydantic~=1.7.4',
-        'newrelic~=6.8.0.163',
         'ratelimit==2.2.1',
         'ray==1.8.0',
         'kafka-python==2.0.2'
