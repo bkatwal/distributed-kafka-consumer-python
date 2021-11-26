@@ -59,16 +59,15 @@ class SinkTask(ABC):
     @limits(calls=CALLS, period=1)
     def process(self, consumer_records: List[ConsumerRecord]):
 
-        sink_record_dto_list: List[SinkRecordDTO] = []
-
         for consumer_record in consumer_records:
             try:
                 sink_record_dto: SinkRecordDTO = self.stream_transformer.transform(consumer_record)
-                sink_record_dto_list.append(sink_record_dto)
+                sink_record_dto_list: List[SinkRecordDTO] = [sink_record_dto]
             except Exception as e:
                 self.handle_dlq_push(consumer_record.key, consumer_record.value,
                                      consumer_record.topic, consumer_record.partition,
                                      'TRANSFORM', e, consumer_record.offset)
+                continue
 
             try:
                 self.write_to_sink(sink_record_dto_list)
