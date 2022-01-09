@@ -1,0 +1,178 @@
+####
+# We are creating one head pod and 2 worker replica pods.
+# Head node takes one core and 512 MB of memory — change this as you need
+# Worker node takes 0.5 CPU and 512 MB of memory — change this as you need
+# Expose dashboard, ray head node and Redis server for public access using K8 external service
+#   using NodePort.
+# Install all code dependencies as a package in both head and worker nodes. This way Ray head
+# nodes and worker nodes can find these modules.
+####
+---
+# create namespace, where all ray components will be deployed
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ray
+---
+# create service to expose ray head, redis and ray dashboard.
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ray
+  name: ray-head-service
+spec:
+  type: NodePort
+  ports:
+    - name: client
+      protocol: TCP
+      port: 10001
+      targetPort: 10001
+      nodePort: 30001
+    - name: dashboard
+      protocol: TCP
+      port: 8265
+      targetPort: 8265
+      nodePort: 30002
+    - name: redis
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+      nodePort: 30003
+  selector:
+    component: ray-head
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ray-head-config
+  namespace: ray
+data:
+  ray-head-url: ray-head-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ray
+  name: ray-head
+spec:
+  # Do not change this - Ray currently only supports one head node per cluster.
+  replicas: 1
+  selector:
+    matchLabels:
+      component: ray-head
+      type: ray
+  template:
+    metadata:
+      labels:
+        component: ray-head
+        type: ray
+    spec:
+      # If the head node goes down, the entire cluster (including all worker
+      # nodes) will go down as well. If you want Kubernetes to bring up a new
+      # head node in this case, set this to "Always," else set it to "Never."
+      restartPolicy: Always
+
+      # This volume allocates shared memory for Ray to use for its plasma
+      # object store. If you do not provide this, Ray will fall back to
+      # /tmp which cause slowdowns if is not a shared memory volume.
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+      containers:
+        - name: ray-head
+          image: rayproject/ray:1.8.0
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash" ]
+          args:
+            - -c
+            - >-
+              pip install kafka-connect-dependency==0.1.1 &&
+              ray start --head --port=6379 --redis-shard-ports=6380,6381 --num-cpus=$MY_CPU_REQUEST --object-manager-port=12345 --node-manager-port=12346 --dashboard-host=0.0.0.0 --block
+          ports:
+            - containerPort: 6379  # Redis port
+            - containerPort: 10001  # Used by Ray Client
+            - containerPort: 8265  # Used by Ray Dashboard
+            - containerPort: 8000 # Used by Ray Serve
+
+          # This volume allocates shared memory for Ray to use for its plasma
+          # object store. If you do not provide this, Ray will fall back to
+          # /tmp which cause slowdowns if is not a shared memory volume.
+          volumeMounts:
+            - mountPath: /dev/shm
+              name: dshm
+          env:
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            # This is used in the ray start command so that Ray can spawn the
+            # correct number of processes. Omitting this may lead to degraded
+            # performance.
+            - name: MY_CPU_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  resource: requests.cpu
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ray
+  name: ray-worker
+spec:
+  # Change this to scale the number of worker nodes started in the Ray cluster.
+  replicas: 3
+  selector:
+    matchLabels:
+      component: ray-worker
+      type: ray
+  template:
+    metadata:
+      labels:
+        component: ray-worker
+        type: ray
+    spec:
+      restartPolicy: Always
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+      containers:
+        - name: ray-worker
+          image: rayproject/ray:1.8.0
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash" ]
+          args:
+            - -c
+            - >-
+              pip install kafka-connect-dependency==0.1.1 &&
+              ray start --num-cpus=$MY_CPU_REQUEST --address=$RAY_HEAD_IP:6379 --object-manager-port=12345 --node-manager-port=12346 --block
+          # This volume allocates shared memory for Ray to use for its plasma
+          # object store. If you do not provide this, Ray will fall back to
+          # /tmp which cause slowdowns if is not a shared memory volume.
+          volumeMounts:
+            - mountPath: /dev/shm
+              name: dshm
+          env:
+            # This is used in the ray start command so that Ray can spawn the
+            # correct number of processes. Omitting this may lead to degraded
+            # performance.
+            - name: MY_CPU_REQUEST
+              valueFrom:
+                resourceFieldRef:
+                  resource: requests.cpu
+            - name: RAY_HEAD_IP
+              valueFrom:
+                configMapKeyRef:
+                  name: ray-head-config
+                  key: ray-head-url
+          resources:
+            requests:
+              cpu: 250m
+              memory: 300Mi
+
+
